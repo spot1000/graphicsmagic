@@ -1,0 +1,13 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title Upload images to server using Node JS
+    body
+        form#frmUploader(enctype="multipart/form-data", action="api/Upload/", method="post")
+            input(type="file", name="avatar", multiple="")
+            input#btnSubmit(type="submit", name="submit", value="Upload")
+    img(src= image)
+    input#btncrop(type="submit", name="crop", value="crop")
+    input#btncrop(type="submit", name="crop", value="resize")
+    input#btncrop(type="submit", name="crop", value="rotate")   
