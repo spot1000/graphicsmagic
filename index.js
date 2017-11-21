@@ -27,12 +27,16 @@ app.use(bodyParser.json());
 
 
 app.use('/uploads', express.static('uploads'));
+app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 
 app.set('view engine', 'pug');
 app.set('views', './views');
 
 let imagePath = ''
-
+let imagePath2 = "/upload/newfile"
 
 app.get("/", function (req, res) {
     res.render('index', {
@@ -40,54 +44,49 @@ app.get("/", function (req, res) {
     });
 });
 
-app.post("/api/Upload", upload.single('avatar'), function (req, res) {
-    imagePath = req.file.path
-    res.redirect('/')
-    console.log(req.file.path)
+app.get("/redirected", function (req, res) {
+    res.render('index', {
+        stuff: "THIS"
+    });
 });
 
-app.post('/api/resize?x=:x&y=:y', function (req, res) {
-    gm(`${imagePath}`)
-        .resize(req.params.x, req.params.y)
-        .noProfile()
-        .write(`${imagePath}`, function (err) {
-            if (!err) console.log('done');
-        });
-    res.redirect('/');    
-})
-
-app.post('/api/crop?height=:height&width=:width&x=:x&y=:y', function (req,res) {
-    gm(`${imagePath}`)
-        .crop(`${width}`, `${height}`, `${x}`, `${y}`)
-        .noProfile()
-        .write(`${imagePath}`, function (err) {
-            if (!err) console.log('done');
-        });
+app.post("/api/Upload", upload.single('avatar'), function (req, res) {
+    imagePath = req.file.path
     res.redirect('/');
-})
+});
 
-app.post('/api/crop?height=:height&width=:width&x=:x&y=:y', function (req, res) {
+app.post('/api/resize', function (req, res) {
+    console.log(res.body)
     gm(`${imagePath}`)
-        .crop(`${width}`, `${height}`, `${x}`, `${y}`)
+        .resize(req.body.resizex, req.body.resizey)
+        .autoOrient()
+        .write(`${imagePath}`, function (err) {
+            if (!err) console.log(' hooray! ');
+            res.redirect('/')
+        });   
+})
+
+app.post('/api/crop', function (req,res) {
+    console.log(res.body)
+    gm(`${imagePath}`)
+        .crop(req.body.height, req.body.width, req.body.cropx, req.body.cropy)
         .noProfile()
         .write(`${imagePath}`, function (err) {
             if (!err) console.log('done');
+            res.redirect('/');
         });
-    res.redirect('/');
 })
 
-app.post('/api/crop?height=:height&width=:width&x=:x&y=:y', function (req, res) {
-    gm("img.png").rotate(color, degrees)
-        .crop(`${width}`, `${height}`, `${x}`, `${y}`)
+app.post('/api/rotate', function (req, res) {
+    console.log(res.body)
+    gm(`${imagePath}`)
+        .rotate(req.body.color, req.body.degrees)
         .noProfile()
         .write(`${imagePath}`, function (err) {
             if (!err) console.log('done');
+            res.redirect('/');
         });
-    res.redirect('/');
 })
-
-gm("img.png").rotate(color, degrees)
-
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
